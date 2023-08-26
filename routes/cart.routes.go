@@ -2,12 +2,13 @@ package routes
 
 import (
 	"github.com/aditansh/balkan-task/controllers"
+	"github.com/aditansh/balkan-task/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
 func CartRoutes(app *fiber.App) {
 
-	cart := app.Group("/cart", middleware.verifyUserToken)
+	cart := app.Group("/cart", middleware.VerifyUserToken)
 	cart.Post("/add", controllers.AddToCart)
 	cart.Post("/remove", controllers.RemoveFromCart)
 	cart.Post("/update", controllers.UpdateCart)
