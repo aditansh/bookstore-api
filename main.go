@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	initializers "github.com/aditansh/go-notes/config"
-	database "github.com/aditansh/go-notes/db"
+	"github.com/aditansh/balkan-task/config"
+	"github.com/aditansh/balkan-task/database"
+
 	// "github.com/aditansh/go-notes/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -16,7 +17,7 @@ func main() {
 
 	app := fiber.New()
 
-	config, err := initializers.LoadEnvVariables(".")
+	config, err := config.LoadEnvVariables(".")
 	if err != nil {
 		log.Fatalf("Error loading env variables: %s", err.Error())
 	}

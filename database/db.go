@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	config "github.com/aditansh/go-notes/config"
-	// models "github.com/aditansh/go-notes/models"
+	"github.com/aditansh/balkan-task/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -27,6 +26,7 @@ func ConnectDB(config *config.Config) {
 	DB.Logger = logger.Default.LogMode(logger.Silent)
 
 	log.Println("Running migrations")
+	RunMigrations(DB)
 
 	log.Println("Database connected")
 }
