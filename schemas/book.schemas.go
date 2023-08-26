@@ -6,25 +6,16 @@ type SearchBooksSchema struct {
 }
 
 type FilterBooksSchema struct {
-	Filters FilterSchema `json:"filters" validate:"required"`
+	Filters BookFiltersSchema `json:"filters" validate:"required"`
 }
 
-type FilterSchema struct {
+type BookFiltersSchema struct {
+	Authors     []string  `json:"authors"`
 	Categories  []string  `json:"categories"`
 	PriceRange  []float64 `json:"priceRange"`
 	InStock     bool      `json:"inStock"`
 	RatingRange []int     `json:"ratingRange"`
 	Vendors     []string  `json:"vendors"`
-}
-
-type ReviewSchema struct {
-	BookID  string `json:"book_id" validate:"required"`
-	Comment string `json:"comment" validate:"required"`
-	Rating  int    `json:"rating" validate:"required"`
-}
-
-type DeleteReviewSchema struct {
-	ID string `json:"id" validate:"required"`
 }
 
 type CreateBookSchema struct {

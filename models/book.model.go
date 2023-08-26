@@ -18,6 +18,7 @@ type Book struct {
 	Reviews     []Review   `gorm:"foreignKey:BookID" json:"reviews"`
 	InCart      []CartItem `gorm:"foreignKey:BookID" json:"inCart"`
 	Vendors     []Vendor   `gorm:"many2many:book_vendor" json:"vendors"`
+	Cost        float64    `gorm:"not null" json:"cost"`
 	CreatedAt   time.Time  `gorm:"autoCreateTime" json:"-"`
 	UpdatedAt   time.Time  `gorm:"autoUpdateTime" json:"-"`
 }
