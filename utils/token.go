@@ -3,9 +3,13 @@ package utils
 import (
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/aditansh/balkan-task/models"
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 )
 
 type TokenPayload struct {
@@ -55,14 +59,51 @@ func ValidateToken(token string, secret string) (TokenPayload, error) {
 		return TokenPayload{}, fmt.Errorf("invalid token")
 	}
 
-	role, ok := claims["role"].(string)
-	if !ok {
-		return TokenPayload{}, fmt.Errorf("invalid token")
-	}
-
 	return TokenPayload{
 		ID:    ID,
 		Email: email,
-		Role:  role,
 	}, nil
+}
+
+func VerifyToken(c *fiber.Ctx, f func(string) (models.User, error)) (models.User, *fiber.Error) {
+
+	authHeader := c.Get("Authorization")
+	if authHeader == "" {
+		return models.User{}, fiber.NewError(fiber.StatusBadRequest, "No authorization header found")
+	}
+	token := GetToken(authHeader)
+
+	if token == "" {
+		return models.User{}, fiber.NewError(fiber.StatusBadRequest, "No token found")
+	}
+
+	res, err := ValidateToken(token, viper.GetString("ACCESS_TOKEN_SECRET"))
+	if err != nil {
+		return models.User{}, fiber.NewError(fiber.StatusUnauthorized, err.Error())
+	}
+
+	user, err := f(res.Email)
+	if err != nil {
+		return models.User{}, fiber.NewError(fiber.StatusUnauthorized, err.Error())
+	}
+
+	return user, nil
+}
+
+func GenerateToken(userID uuid.UUID, email string, secret string, expiry time.Duration) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"ID":    userID.String(),
+		"email": email,
+		"exp":   time.Now().Add(expiry).Unix(),
+	})
+
+	return token.SignedString([]byte(secret))
+}
+
+func GenerateRefreshToken(userID uuid.UUID, email string) (string, error) {
+	return GenerateToken(userID, email, viper.GetString("REFRESH_TOKEN_SECRET"), viper.GetDuration("REFRESH_TOKEN_EXPIRY"))
+}
+
+func GenerateAccessToken(userID uuid.UUID, email string) (string, error) {
+	return GenerateToken(userID, email, viper.GetString("ACCESS_TOKEN_SECRET"), viper.GetDuration("ACCESS_TOKEN_EXPIRY"))
 }
