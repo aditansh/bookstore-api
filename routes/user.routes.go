@@ -10,7 +10,6 @@ func UserRoutes(app *fiber.App) {
 
 	user := app.Group("/user")
 	user.Post("/register", controllers.RegisterUser)
-	user.Post("/login", controllers.LoginUser)
 
 	user.Post("/update", middleware.VerifyUserToken, controllers.UpdateUser)
 	user.Get("/me", middleware.VerifyUserToken, controllers.GetUserProfile)

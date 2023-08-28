@@ -1,11 +1,11 @@
 package schemas
 
-type LoginUserSchema struct {
-	Username string `json:"email" validate:"required"`
+type LoginUsernameSchema struct {
+	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required,min=6"`
 }
 
-type LoginVendorSchema struct {
+type LoginEmailSchema struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6"`
 }
@@ -15,7 +15,8 @@ type LoginResponseSchema struct {
 }
 
 type VerifyOTPSchema struct {
-	OTP string `json:"otp" validate:"required,min=6,max=6"`
+	Email string `json:"email" validate:"required,email"`
+	OTP   string `json:"otp" validate:"required,min=6,max=6"`
 }
 
 type ResendOTPSchema struct {
@@ -27,6 +28,7 @@ type ForgotPasswordSchema struct {
 }
 
 type ResetPasswordSchema struct {
+	OTP      string `json:"otp" validate:"required,min=6,max=6"`
 	Password string `json:"password" validate:"required,min=6"`
 }
 
@@ -37,10 +39,6 @@ type UpdatePasswordSchema struct {
 
 type RefreshTokenSchema struct {
 	RefreshToken string `json:"refreshToken" validate:"required"`
-}
-
-type RefreshTokenResponseSchema struct {
-	AccessToken string `json:"accessToken"`
 }
 
 type LogoutSchema struct {

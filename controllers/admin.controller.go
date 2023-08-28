@@ -8,10 +8,6 @@ func RegisterAdmin(c *fiber.Ctx) error {
 	return nil
 }
 
-func LoginAdmin(c *fiber.Ctx) error {
-	return nil
-}
-
 func UpdateAdmin(c *fiber.Ctx) error {
 	return nil
 }

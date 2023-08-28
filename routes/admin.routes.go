@@ -9,7 +9,6 @@ import (
 func AdminRoutes(app *fiber.App) {
 
 	app.Post("/register", controllers.RegisterAdmin)
-	app.Post("/login", controllers.LoginAdmin)
 
 	admin := app.Group("/admin", middleware.VerifyAdminToken)
 	admin.Post("/update", controllers.UpdateAdmin)
