@@ -6,8 +6,7 @@ import (
 
 	"github.com/aditansh/balkan-task/config"
 	"github.com/aditansh/balkan-task/database"
-
-	// "github.com/aditansh/go-notes/routes"
+	"github.com/aditansh/balkan-task/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -40,7 +39,7 @@ func main() {
 		})
 	})
 
-	// routes.SetupRoutes(app)
+	routes.SetupRoutes(app)
 
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{
