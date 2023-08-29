@@ -157,7 +157,7 @@ func DeactivateUsers(c *fiber.Ctx) error {
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
-			"message": err.Error(),
+			"message": "Invalid request",
 		})
 	}
 
@@ -189,7 +189,7 @@ func DeleteUsers(c *fiber.Ctx) error {
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
-			"message": err.Error(),
+			"message": "Invalid request",
 		})
 	}
 
@@ -212,37 +212,5 @@ func DeleteUsers(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  true,
 		"message": "Users deleted successfully",
-	})
-}
-
-func FlagUser(c *fiber.Ctx) error {
-	var payload schemas.FlagUserVendorSchema
-
-	if err := c.BodyParser(&payload); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status":  false,
-			"message": err.Error(),
-		})
-	}
-
-	errors := utils.ValidateStruct(payload)
-	if errors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": false,
-			"errors": errors,
-		})
-	}
-
-	err := services.FlagUser(payload.Username)
-	if err != nil {
-		return c.Status(err.Code).JSON(fiber.Map{
-			"status":  false,
-			"message": err.Message,
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  true,
-		"message": "User flagged successfully",
 	})
 }

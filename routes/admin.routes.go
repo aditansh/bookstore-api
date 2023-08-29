@@ -54,10 +54,10 @@ func AdminRoutes(app *fiber.App) {
 
 	//vendors
 	admin.Get("/vendors", controllers.GetAllVendors)
-	admin.Get("/vendor/:id", controllers.GetVendor)
+	admin.Get("/vendor/:email", controllers.GetVendor)
 	admin.Post("/vendor/register", controllers.RegisterVendor)
-	admin.Post("/vendor/update", controllers.UpdateVendor)
-	admin.Post("/vendor/deactivate", controllers.DeactivateAccount)
+	admin.Post("/vendor/update/:email", controllers.UpdateVendor)
+	admin.Post("/vendor/deactivate", controllers.DeactivateVendors)
 	admin.Post("/vendor/delete", controllers.DeleteVendors)
 	admin.Post("/vendor/approve", controllers.ApproveVendor)
 

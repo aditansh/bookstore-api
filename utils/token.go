@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aditansh/balkan-task/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -65,29 +64,24 @@ func ValidateToken(token string, secret string) (TokenPayload, error) {
 	}, nil
 }
 
-func VerifyToken(c *fiber.Ctx, f func(string) (models.User, error)) (models.User, *fiber.Error) {
+func VerifyToken(c *fiber.Ctx) (string, *fiber.Error) {
 
 	authHeader := c.Get("Authorization")
 	if authHeader == "" {
-		return models.User{}, fiber.NewError(fiber.StatusBadRequest, "No authorization header found")
+		return "", fiber.NewError(fiber.StatusBadRequest, "No authorization header found")
 	}
 	token := GetToken(authHeader)
 
 	if token == "" {
-		return models.User{}, fiber.NewError(fiber.StatusBadRequest, "No token found")
+		return "", fiber.NewError(fiber.StatusBadRequest, "No token found")
 	}
 
 	res, err := ValidateToken(token, viper.GetString("ACCESS_TOKEN_SECRET"))
 	if err != nil {
-		return models.User{}, fiber.NewError(fiber.StatusUnauthorized, err.Error())
+		return "", fiber.NewError(fiber.StatusUnauthorized, err.Error())
 	}
 
-	user, err := f(res.Email)
-	if err != nil {
-		return models.User{}, fiber.NewError(fiber.StatusUnauthorized, err.Error())
-	}
-
-	return user, nil
+	return res.Email, nil
 }
 
 func GenerateToken(userID uuid.UUID, email string, secret string, expiry time.Duration) (string, error) {

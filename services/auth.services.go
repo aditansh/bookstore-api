@@ -32,7 +32,7 @@ func LoginEmail(payload *schemas.LoginEmailSchema) (string, *fiber.Error) {
 
 		result := database.DB.Model(&user).Updates(updates)
 		if result.Error != nil {
-			return "", fiber.NewError(fiber.StatusInternalServerError, "Error updating user")
+			return "", fiber.NewError(fiber.StatusInternalServerError, result.Error.Error())
 		}
 	}
 
@@ -42,7 +42,7 @@ func LoginEmail(payload *schemas.LoginEmailSchema) (string, *fiber.Error) {
 
 		result := database.DB.Model(&user).Updates(updates)
 		if result.Error != nil {
-			return "", fiber.NewError(fiber.StatusInternalServerError, "Error updating user")
+			return "", fiber.NewError(fiber.StatusInternalServerError, result.Error.Error())
 		}
 	}
 
@@ -212,6 +212,7 @@ func ResetPassword(payload *schemas.ResetPasswordSchema) *fiber.Error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
+
 	if utils.CheckPasswordHash(payload.Password, user.Password) {
 		return fiber.NewError(fiber.StatusConflict, "New password cannot be same as old password")
 	}
@@ -240,11 +241,15 @@ func ResetPassword(payload *schemas.ResetPasswordSchema) *fiber.Error {
 func UpdatePassword(payload *schemas.UpdatePasswordSchema, email string) *fiber.Error {
 	user, err := GetUserByEmail(email)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
 
 	if !utils.CheckPasswordHash(payload.OldPassword, user.Password) {
 		return fiber.NewError(fiber.StatusUnauthorized, "Incorrect password")
+	}
+
+	if payload.OldPassword == payload.NewPassword {
+		return fiber.NewError(fiber.StatusBadRequest, "New Password cannot be the same as old password")
 	}
 
 	newPass, err := utils.HashPassword(payload.NewPassword)
@@ -271,12 +276,12 @@ func RefreshAccessToken(payload *schemas.RefreshTokenSchema) (string, *fiber.Err
 
 	userID, err := uuid.Parse(ID)
 	if err != nil {
-		return "", fiber.NewError(fiber.StatusUnauthorized, "Invalid refresh token")
+		return "", fiber.NewError(fiber.StatusUnauthorized, "Error parsing user id")
 	}
 
 	user, err := GetUserByID(userID)
 	if err != nil {
-		return "", fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return "", fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
 
 	token, err := utils.GenerateAccessToken(user.ID, user.Email)
@@ -293,14 +298,9 @@ func Logout(payload *schemas.LogoutSchema) *fiber.Error {
 		return fiber.NewError(fiber.StatusUnauthorized, "Invalid refresh token")
 	}
 
-	userID, err := uuid.Parse(id)
+	_, err = uuid.Parse(id)
 	if err != nil {
 		return fiber.NewError(fiber.StatusUnauthorized, "Invalid refresh token")
-	}
-
-	_, err = GetUserByID(userID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	err = cache.DeleteValue(payload.RefreshToken)
@@ -314,7 +314,7 @@ func Logout(payload *schemas.LogoutSchema) *fiber.Error {
 func DeactivateAccount(email string) *fiber.Error {
 	user, err := GetUserByEmail(email)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
 
 	if !user.IsActive {
@@ -335,7 +335,7 @@ func DeactivateAccount(email string) *fiber.Error {
 func DeleteAccount(email string) *fiber.Error {
 	user, err := GetUserByEmail(email)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
 
 	if user.IsDeleted {

@@ -163,12 +163,12 @@ func UpdateUser(payload *schemas.UpdateUserSchema, ID uuid.UUID) *fiber.Error {
 		updates["is_verified"] = false
 		otp, _ := utils.GenerateOTP(6)
 		//clear any otp set for this email due to previous failed attempts
-		err = cache.DeleteValue(user.Email)
+		err = cache.DeleteValue(payload.Email)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
 		}
 
-		err = cache.SetValue(user.Email, otp, 48*time.Hour)
+		err = cache.SetValue(payload.Email, otp, 48*time.Hour)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "Error storing OTP")
 		}

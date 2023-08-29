@@ -15,9 +15,12 @@ func VendorRoutes(app *fiber.App) {
 	vendor.Post("/resendotp", controllers.ResendVendorOTP)
 	vendor.Post("/forgot", controllers.ForgotVendorPasswordMail)
 	vendor.Post("/refresh", controllers.RefreshVendorToken)
+	vendor.Post("/reset", controllers.ResetVendorPassword)
 
-	vendor.Post("/reset", middleware.VerifyVendorToken, controllers.ResetVendorPassword)
 	vendor.Post("/updatepassword", middleware.VerifyVendorToken, controllers.UpdateVendorPassword)
+	vendor.Post("/logout", middleware.VerifyVendorToken, controllers.LogoutVendor)
+	vendor.Get("/deactivate", middleware.VerifyVendorToken, controllers.DeactivateVendorAccount)
+	vendor.Get("/delete", middleware.VerifyVendorToken, controllers.DeleteVendorAccount)
 	vendor.Post("/update", middleware.VerifyVendorToken, controllers.UpdateVendor)
 	vendor.Get("/me", middleware.VerifyVendorToken, controllers.GetVendorProfile)
 }

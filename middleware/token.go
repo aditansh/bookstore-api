@@ -4,16 +4,23 @@ import (
 	"github.com/aditansh/balkan-task/services"
 	"github.com/aditansh/balkan-task/utils"
 	"github.com/gofiber/fiber/v2"
-	"github.com/spf13/viper"
 )
 
 // VerifyAdminToken verifies the admin token
 func VerifyAdminToken(c *fiber.Ctx) error {
-	user, err := utils.VerifyToken(c, services.GetUserByEmail)
+	email, err := utils.VerifyToken(c)
 	if err != nil {
 		return c.Status(err.Code).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Message,
+		})
+	}
+
+	user, errr := services.GetUserByEmail(email)
+	if errr != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status":  false,
+			"message": errr.Error(),
 		})
 	}
 
@@ -31,11 +38,19 @@ func VerifyAdminToken(c *fiber.Ctx) error {
 
 // VerifyUserToken verifies the user token
 func VerifyUserToken(c *fiber.Ctx) error {
-	user, err := utils.VerifyToken(c, services.GetUserByEmail)
+	email, err := utils.VerifyToken(c)
 	if err != nil {
 		return c.Status(err.Code).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Message,
+		})
+	}
+
+	user, errr := services.GetUserByEmail(email)
+	if errr != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status":  false,
+			"message": errr.Error(),
 		})
 	}
 
@@ -54,7 +69,7 @@ func VerifyUserToken(c *fiber.Ctx) error {
 // VerifyToken verifies the token for all
 func VerifyToken(c *fiber.Ctx) error {
 
-	user, err := utils.VerifyToken(c, services.GetUserByEmail)
+	email, err := utils.VerifyToken(c)
 	if err != nil {
 		return c.Status(err.Code).JSON(fiber.Map{
 			"status":  false,
@@ -62,46 +77,30 @@ func VerifyToken(c *fiber.Ctx) error {
 		})
 	}
 
-	c.Locals("Email", user.Email)
+	c.Locals("Email", email)
 
 	return c.Next()
 }
 
 // VerifyVendorToken verifies the vendor token
 func VerifyVendorToken(c *fiber.Ctx) error {
-	authHeader := c.Get("Authorization")
-	if authHeader == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status":  false,
-			"message": "No authorization header found",
-		})
-	}
-	token := utils.GetToken(authHeader)
-
-	if token == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"status":  false,
-			"message": "Token not found",
-		})
-	}
-
-	res, err := utils.ValidateToken(token, viper.GetString("ACCESS_TOKEN_SECRET"))
+	email, err := utils.VerifyToken(c)
 	if err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Message,
+		})
+	}
+
+	vendor, errr := services.GetVendorByEmail(email)
+	if errr != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	_, err = services.GetVendorByID(res.ID)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"status":  false,
-			"message": err.Error(),
-		})
-	}
-
-	c.Locals("ID", res.ID)
+	c.Locals("ID", vendor.ID)
 
 	return c.Next()
 }

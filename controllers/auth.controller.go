@@ -296,7 +296,6 @@ func Logout(c *fiber.Ctx) error {
 		"status":  true,
 		"message": "Logged out successfully",
 	})
-
 }
 
 func DeactivateAccount(c *fiber.Ctx) error {

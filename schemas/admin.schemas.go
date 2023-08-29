@@ -4,6 +4,10 @@ type PromoteDeactivateDeleteAccountsSchema struct {
 	Usernames []string `json:"usernames" validate:"required"`
 }
 
+type DeactivateDeleteVendorsSchema struct {
+	Emails []string `json:"emails" validate:"required"`
+}
+
 type GetUserCartOrdersSchema struct {
 	UserID string `json:"user_id" validate:"required"`
 }
@@ -19,9 +23,9 @@ type ClearUserCartSchema struct {
 }
 
 type ApproveVendorSchema struct {
-	ID string `json:"id" validate:"required"`
+	Email string `json:"email" validate:"email,required"`
 }
 
 type FlagUserVendorSchema struct {
-	Username string `json:"username" validate:"required"`
+	Email string `json:"email" validate:"email,required"`
 }

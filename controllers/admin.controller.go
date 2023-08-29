@@ -89,6 +89,38 @@ func MakeAdmins(c *fiber.Ctx) error {
 	})
 }
 
+func FlagUser(c *fiber.Ctx) error {
+	var payload schemas.FlagUserVendorSchema
+
+	if err := c.BodyParser(&payload); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  false,
+			"message": "Invalid request",
+		})
+	}
+
+	errors := utils.ValidateStruct(payload)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status": false,
+			"errors": errors,
+		})
+	}
+
+	err := services.FlagUser(payload.Email)
+	if err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Message,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  true,
+		"message": "User flagged successfully",
+	})
+}
+
 func GetFlaggedUsers(c *fiber.Ctx) error {
 	users, err := services.GetFlaggedUsers()
 	if err != nil {
@@ -104,6 +136,49 @@ func GetFlaggedUsers(c *fiber.Ctx) error {
 	})
 }
 
+func FlagVendor(c *fiber.Ctx) error {
+	var payload schemas.FlagUserVendorSchema
+
+	if err := c.BodyParser(&payload); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  false,
+			"message": "Invalid request",
+		})
+	}
+
+	errors := utils.ValidateStruct(&payload)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status": false,
+			"errors": errors,
+		})
+	}
+
+	err := services.FlagVendor(payload.Email)
+	if err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Message,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  true,
+		"message": "Vendor flagged successfully",
+	})
+}
+
 func GetFlaggedVendors(c *fiber.Ctx) error {
-	return nil
+	vendors, err := services.GetFlaggedVendors()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status": true,
+		"data":   vendors,
+	})
 }
