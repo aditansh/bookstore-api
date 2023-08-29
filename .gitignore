@@ -28,3 +28,4 @@ go.work
 main
 .env
 secret.json
+/tmp

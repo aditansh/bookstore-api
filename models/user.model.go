@@ -19,6 +19,7 @@ type User struct {
 	Reviews    []Review  `gorm:"foreignKey:UserID" json:"reviews"`
 	Cart       Cart      `gorm:"foreignKey:UserID" json:"cart"`
 	Orders     []Order   `gorm:"foreignKey:UserID" json:"orders"`
+	IsFlagged  bool      `gorm:"default:false" json:"isFlagged"`
 	CreatedAt  time.Time `gorm:"autoCreateTime" json:"-"`
 	UpdatedAt  time.Time `gorm:"autoUpdateTime" json:"-"`
 }

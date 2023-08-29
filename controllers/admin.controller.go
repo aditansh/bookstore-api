@@ -90,7 +90,18 @@ func MakeAdmins(c *fiber.Ctx) error {
 }
 
 func GetFlaggedUsers(c *fiber.Ctx) error {
-	return nil
+	users, err := services.GetFlaggedUsers()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status": true,
+		"data":   users,
+	})
 }
 
 func GetFlaggedVendors(c *fiber.Ctx) error {

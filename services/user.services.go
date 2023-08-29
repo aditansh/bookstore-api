@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/aditansh/balkan-task/cache"
@@ -29,6 +30,10 @@ func GetUserByID(id uuid.UUID) (models.User, error) {
 		return models.User{}, result.Error
 	}
 
+	if user.IsDeleted && user.IsFlagged {
+		return models.User{}, fmt.Errorf("account is deleted")
+	}
+
 	return user, nil
 }
 
@@ -37,6 +42,10 @@ func GetUserByUsername(username string) (models.User, error) {
 	result := database.DB.Where("username = ?", username).First(&user)
 	if result.Error != nil {
 		return models.User{}, result.Error
+	}
+
+	if user.IsDeleted && user.IsFlagged {
+		return models.User{}, fmt.Errorf("account is deleted")
 	}
 
 	return user, nil
@@ -49,7 +58,21 @@ func GetUserByEmail(email string) (models.User, error) {
 		return models.User{}, result.Error
 	}
 
+	if user.IsDeleted && user.IsFlagged {
+		return models.User{}, fmt.Errorf("account is deleted")
+	}
+
 	return user, nil
+}
+
+func GetFlaggedUsers() ([]models.User, error) {
+	var users []models.User
+	result := database.DB.Where("is_flagged = ?", true).Find(&users)
+	if result.Error != nil {
+		return []models.User{}, result.Error
+	}
+
+	return users, nil
 }
 
 func RegisterUser(payload *schemas.RegisterUserSchema, isAdmin bool) *fiber.Error {

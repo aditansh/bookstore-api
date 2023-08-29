@@ -64,6 +64,6 @@ func AdminRoutes(app *fiber.App) {
 	//moderation
 	admin.Post("/flaguser", controllers.FlagUser)
 	admin.Post("/flagvendor", controllers.FlagVendor)
-	admin.Get("/flag/user", controllers.GetFlaggedUsers)
-	admin.Get("/flag/vendor", controllers.GetFlaggedVendors)
+	admin.Get("/flag/users", controllers.GetFlaggedUsers)
+	admin.Get("/flag/vendors", controllers.GetFlaggedVendors)
 }

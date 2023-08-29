@@ -351,5 +351,11 @@ func DeleteAccount(email string) *fiber.Error {
 		return fiber.NewError(fiber.StatusInternalServerError, "Error updating user")
 	}
 
+	body := "Thank you for using our platform. Your account will be deleted in 5 days. If you wish to restore your account, login using the same credentials."
+	err = utils.SendEmail(email, "Account Deleted", body)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Error sending mail")
+	}
+
 	return nil
 }

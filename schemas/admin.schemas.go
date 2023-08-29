@@ -23,5 +23,5 @@ type ApproveVendorSchema struct {
 }
 
 type FlagUserVendorSchema struct {
-	ID string `json:"id" validate:"required"`
+	Username string `json:"username" validate:"required"`
 }
