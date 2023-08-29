@@ -12,14 +12,14 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllUsers() error {
+func GetAllUsers() ([]models.User, error) {
 	var users []models.User
 	result := database.DB.Find(&users)
 	if result.Error != nil {
-		return result.Error
+		return []models.User{}, result.Error
 	}
 
-	return nil
+	return users, nil
 }
 
 func GetUserByID(id uuid.UUID) (models.User, error) {
@@ -52,7 +52,7 @@ func GetUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
-func RegisterUser(payload *schemas.RegisterUserSchema) *fiber.Error {
+func RegisterUser(payload *schemas.RegisterUserSchema, isAdmin bool) *fiber.Error {
 
 	_, check1 := GetUserByEmail(payload.Email)
 	if check1 == nil {
@@ -85,6 +85,14 @@ func RegisterUser(payload *schemas.RegisterUserSchema) *fiber.Error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "Error sending mail")
 	}
+
+	var role string
+	if isAdmin {
+		role = "admin"
+	} else {
+		role = "user"
+	}
+
 	newUser := models.User{
 		Name:       payload.Name,
 		Username:   payload.Username,
@@ -92,7 +100,7 @@ func RegisterUser(payload *schemas.RegisterUserSchema) *fiber.Error {
 		Password:   hashedPassword,
 		IsVerified: false,
 		IsDeleted:  false,
-		Role:       "user",
+		Role:       role,
 	}
 
 	result := database.DB.Create(&newUser)
@@ -130,6 +138,23 @@ func UpdateUser(payload *schemas.UpdateUserSchema, ID uuid.UUID) *fiber.Error {
 		}
 		updates["email"] = payload.Email
 		updates["is_verified"] = false
+		otp, _ := utils.GenerateOTP(6)
+		//clear any otp set for this email due to previous failed attempts
+		err = cache.DeleteValue(user.Email)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
+		}
+
+		err = cache.SetValue(user.Email, otp, 48*time.Hour)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "Error storing OTP")
+		}
+
+		body := "Your OTP is " + otp + ".\nIt will expire in 48 hours."
+		err = utils.SendEmail(payload.Email, "OTP Verification", body)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "Error sending mail")
+		}
 	}
 	updates["updated_at"] = time.Now()
 
@@ -138,22 +163,17 @@ func UpdateUser(payload *schemas.UpdateUserSchema, ID uuid.UUID) *fiber.Error {
 		return fiber.NewError(fiber.StatusInternalServerError, "Error updating user")
 	}
 
-	otp, _ := utils.GenerateOTP(6)
-	//clear any otp set for this email due to previous failed attempts
-	err = cache.DeleteValue(user.Email)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "Internal Server Error")
-	}
+	return nil
+}
 
-	err = cache.SetValue(user.Email, otp, 48*time.Hour)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "Error storing OTP")
-	}
+func UpdateRole(user *models.User, role string) *fiber.Error {
+	updates := make(map[string]interface{})
+	updates["role"] = role
+	updates["updated_at"] = time.Now()
 
-	body := "Your OTP is " + otp + ".\nIt will expire in 48 hours."
-	err = utils.SendEmail(payload.Email, "OTP Verification", body)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "Error sending mail")
+	result := database.DB.Model(&user).Updates(updates)
+	if result.Error != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Error updating user")
 	}
 
 	return nil

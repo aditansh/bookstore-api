@@ -29,6 +29,44 @@ func VerifyAdminToken(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+// VerifyUserToken verifies the user token
+func VerifyUserToken(c *fiber.Ctx) error {
+	user, err := utils.VerifyToken(c, services.GetUserByEmail)
+	if err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Message,
+		})
+	}
+
+	if user.Role != "user" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"status":  false,
+			"message": "Not an user",
+		})
+	}
+
+	c.Locals("ID", user.ID)
+
+	return c.Next()
+}
+
+// VerifyToken verifies the token for all
+func VerifyToken(c *fiber.Ctx) error {
+
+	user, err := utils.VerifyToken(c, services.GetUserByEmail)
+	if err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Message,
+		})
+	}
+
+	c.Locals("Email", user.Email)
+
+	return c.Next()
+}
+
 // VerifyVendorToken verifies the vendor token
 func VerifyVendorToken(c *fiber.Ctx) error {
 	authHeader := c.Get("Authorization")
@@ -64,44 +102,6 @@ func VerifyVendorToken(c *fiber.Ctx) error {
 	}
 
 	c.Locals("ID", res.ID)
-
-	return c.Next()
-}
-
-// VerifyUserToken verifies the user token
-func VerifyUserToken(c *fiber.Ctx) error {
-	user, err := utils.VerifyToken(c, services.GetUserByEmail)
-	if err != nil {
-		return c.Status(err.Code).JSON(fiber.Map{
-			"status":  false,
-			"message": err.Message,
-		})
-	}
-
-	if user.Role != "user" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"status":  false,
-			"message": "Not an user",
-		})
-	}
-
-	c.Locals("ID", user.ID)
-
-	return c.Next()
-}
-
-// VerifyToken verifies the token for all
-func VerifyToken(c *fiber.Ctx) error {
-
-	user, err := utils.VerifyToken(c, services.GetUserByEmail)
-	if err != nil {
-		return c.Status(err.Code).JSON(fiber.Map{
-			"status":  false,
-			"message": err.Message,
-		})
-	}
-
-	c.Locals("Email", user.Email)
 
 	return c.Next()
 }

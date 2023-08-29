@@ -8,18 +8,19 @@ import (
 
 func AdminRoutes(app *fiber.App) {
 
-	app.Post("/register", controllers.RegisterAdmin)
+	app.Post("/admin/register", controllers.RegisterAdmin)
 
 	admin := app.Group("/admin", middleware.VerifyAdminToken)
-	admin.Post("/update", controllers.UpdateAdmin)
+	admin.Post("/update", controllers.UpdateUser)
 	admin.Get("/me", controllers.GetAdminProfile)
 
 	//modify users
 	admin.Get("/users", controllers.GetAllUsers)
-	admin.Get("/user/:id", controllers.GetUser)
+	admin.Get("/user/:username", controllers.GetUser)
 	admin.Post("/user/register", controllers.RegisterUser)
-	admin.Post("/user/update", controllers.UpdateUser)
-	admin.Post("/user/deactivate", controllers.DeactivateAccount)
+	admin.Post("/user/update/:username", controllers.UpdateUser)
+	admin.Post("/user/promote", controllers.MakeAdmins)
+	admin.Post("/user/deactivate", controllers.DeactivateUsers)
 	admin.Post("/user/delete", controllers.DeleteUsers)
 
 	//modify user carts

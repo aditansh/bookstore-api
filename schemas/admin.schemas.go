@@ -1,7 +1,7 @@
 package schemas
 
-type DeactivateDeleteAccountsSchema struct {
-	IDs []string `json:"ids" validate:"required"`
+type PromoteDeactivateDeleteAccountsSchema struct {
+	Usernames []string `json:"usernames" validate:"required"`
 }
 
 type GetUserCartOrdersSchema struct {

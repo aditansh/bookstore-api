@@ -26,7 +26,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		})
 	}
 
-	err := services.RegisterUser(&payload)
+	err := services.RegisterUser(&payload, false)
 	if err != nil {
 		return c.Status(err.Code).JSON(fiber.Map{
 			"status":  false,
@@ -43,6 +43,8 @@ func RegisterUser(c *fiber.Ctx) error {
 
 func UpdateUser(c *fiber.Ctx) error {
 	var payload schemas.UpdateUserSchema
+	var username = c.Params("username")
+	var ID *uuid.UUID
 
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -59,9 +61,21 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	ID := c.Locals("ID").(uuid.UUID)
+	if username == "" {
+		temp := c.Locals("ID").(uuid.UUID)
+		ID = &temp
+	} else {
+		user, err := services.GetUserByUsername(username)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status":  false,
+				"message": err.Error(),
+			})
+		}
+		ID = &user.ID
+	}
 
-	err := services.UpdateUser(&payload, ID)
+	err := services.UpdateUser(&payload, *ID)
 	if err != nil {
 		return c.Status(err.Code).JSON(fiber.Map{
 			"status":  false,
@@ -101,8 +115,13 @@ func GetUserProfile(c *fiber.Ctx) error {
 // admin only routes
 
 func GetAllUsers(c *fiber.Ctx) error {
-
-	users := services.GetAllUsers()
+	users, err := services.GetAllUsers()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Error(),
+		})
+	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status": true,
 		"data":   users,
@@ -110,11 +129,90 @@ func GetAllUsers(c *fiber.Ctx) error {
 }
 
 func GetUser(c *fiber.Ctx) error {
-	return nil
+	username := c.Params("username")
+	if username == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  false,
+			"message": "username not provided",
+		})
+	}
+
+	user, err := services.GetUserByUsername(username)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status": true,
+		"data":   user,
+	})
+}
+
+func DeactivateUsers(c *fiber.Ctx) error {
+	var payload schemas.PromoteDeactivateDeleteAccountsSchema
+
+	if err := c.BodyParser(&payload); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Error(),
+		})
+	}
+
+	errors := utils.ValidateStruct(payload)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status": false,
+			"errors": errors,
+		})
+	}
+
+	err := services.DeactivateUsers(payload.Usernames)
+	if err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Message,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  true,
+		"message": "Users deactivated successfully",
+	})
 }
 
 func DeleteUsers(c *fiber.Ctx) error {
-	return nil
+	var payload schemas.PromoteDeactivateDeleteAccountsSchema
+
+	if err := c.BodyParser(&payload); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Error(),
+		})
+	}
+
+	errors := utils.ValidateStruct(payload)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status": false,
+			"errors": errors,
+		})
+	}
+
+	err := services.DeleteUsers(payload.Usernames)
+	if err != nil {
+		return c.Status(err.Code).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Message,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  true,
+		"message": "Users deleted successfully",
+	})
 }
 
 func FlagUser(c *fiber.Ctx) error {
