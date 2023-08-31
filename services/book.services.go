@@ -2,6 +2,7 @@ package services
 
 import (
 	"regexp"
+	"time"
 
 	"github.com/aditansh/balkan-task/database"
 	"github.com/aditansh/balkan-task/models"
@@ -115,6 +116,7 @@ func UpdateBook(payload *schemas.UpdateBookSchema, bookID uuid.UUID) *fiber.Erro
 	if payload.Stock != 0 {
 		updates["stock"] = payload.Stock
 	}
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&bookToUpdate).Updates(updates)
 	if result.Error != nil {

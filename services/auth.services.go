@@ -29,6 +29,7 @@ func LoginEmail(payload *schemas.LoginEmailSchema) (string, *fiber.Error) {
 	if !user.IsActive {
 		updates := make(map[string]interface{})
 		updates["is_active"] = true
+		updates["updated_at"] = time.Now()
 
 		result := database.DB.Model(&user).Updates(updates)
 		if result.Error != nil {
@@ -39,6 +40,7 @@ func LoginEmail(payload *schemas.LoginEmailSchema) (string, *fiber.Error) {
 	if user.IsDeleted {
 		updates := make(map[string]interface{})
 		updates["is_deleted"] = false
+		updates["updated_at"] = time.Now()
 
 		result := database.DB.Model(&user).Updates(updates)
 		if result.Error != nil {
@@ -77,6 +79,7 @@ func LoginUsername(payload *schemas.LoginUsernameSchema) (string, *fiber.Error) 
 	if !user.IsActive {
 		updates := make(map[string]interface{})
 		updates["is_active"] = true
+		updates["updated_at"] = time.Now()
 
 		result := database.DB.Model(&user).Updates(updates)
 		if result.Error != nil {
@@ -87,6 +90,7 @@ func LoginUsername(payload *schemas.LoginUsernameSchema) (string, *fiber.Error) 
 	if user.IsDeleted {
 		updates := make(map[string]interface{})
 		updates["is_deleted"] = false
+		updates["updated_at"] = time.Now()
 
 		result := database.DB.Model(&user).Updates(updates)
 		if result.Error != nil {
@@ -133,6 +137,7 @@ func VerifyOTP(payload *schemas.VerifyOTPSchema, email string) *fiber.Error {
 
 	updates := make(map[string]interface{})
 	updates["is_verified"] = true
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&user).Updates(updates)
 	if result.Error != nil {
@@ -229,6 +234,7 @@ func ResetPassword(payload *schemas.ResetPasswordSchema) *fiber.Error {
 
 	updates := make(map[string]interface{})
 	updates["password"] = newPass
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&user).Updates(updates)
 	if result.Error != nil {
@@ -259,6 +265,7 @@ func UpdatePassword(payload *schemas.UpdatePasswordSchema, email string) *fiber.
 
 	updates := make(map[string]interface{})
 	updates["password"] = newPass
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&user).Updates(updates)
 	if result.Error != nil {
@@ -323,6 +330,7 @@ func DeactivateAccount(email string) *fiber.Error {
 
 	updates := make(map[string]interface{})
 	updates["is_active"] = false
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&user).Updates(updates)
 	if result.Error != nil {
@@ -345,6 +353,7 @@ func DeleteAccount(email string) *fiber.Error {
 	updates := make(map[string]interface{})
 	updates["is_deleted"] = true
 	updates["is_active"] = false
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&user).Updates(updates)
 	if result.Error != nil {

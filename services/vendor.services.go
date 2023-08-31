@@ -122,6 +122,7 @@ func LoginVendor(payload *schemas.LoginEmailSchema) (string, *fiber.Error) {
 	if !vendor.IsActive {
 		updates := make(map[string]interface{})
 		updates["is_active"] = true
+		updates["updated_at"] = time.Now()
 
 		result := database.DB.Model(&vendor).Updates(updates)
 		if result.Error != nil {
@@ -132,6 +133,7 @@ func LoginVendor(payload *schemas.LoginEmailSchema) (string, *fiber.Error) {
 	if vendor.IsDeleted {
 		updates := make(map[string]interface{})
 		updates["is_deleted"] = false
+		updates["updated_at"] = time.Now()
 
 		result := database.DB.Model(&vendor).Updates(updates)
 		if result.Error != nil {
@@ -178,6 +180,7 @@ func VerifyVendorOTP(payload *schemas.VerifyOTPSchema, email string) *fiber.Erro
 
 	updates := make(map[string]interface{})
 	updates["is_verified"] = true
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&vendor).Updates(updates)
 	if result.Error != nil {
@@ -273,6 +276,7 @@ func ResetVendorPassword(payload *schemas.ResetPasswordSchema) *fiber.Error {
 
 	updates := make(map[string]interface{})
 	updates["password"] = newPass
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&vendor).Updates(updates)
 	if result.Error != nil {
@@ -303,6 +307,7 @@ func UpdateVendorPassword(payload *schemas.UpdatePasswordSchema, ID uuid.UUID) *
 
 	updates := make(map[string]interface{})
 	updates["password"] = newPass
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&vendor).Updates(updates)
 	if result.Error != nil {
@@ -394,6 +399,7 @@ func DeactivateVendorAccount(ID uuid.UUID) *fiber.Error {
 
 	updates := make(map[string]interface{})
 	updates["is_active"] = false
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&vendor).Updates(updates)
 	if result.Error != nil {
@@ -416,6 +422,7 @@ func DeleteVendorAccount(ID uuid.UUID) *fiber.Error {
 	updates := make(map[string]interface{})
 	updates["is_deleted"] = true
 	updates["is_active"] = false
+	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&vendor).Updates(updates)
 	if result.Error != nil {

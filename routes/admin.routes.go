@@ -25,9 +25,9 @@ func AdminRoutes(app *fiber.App) {
 
 	//modify user carts
 	admin.Get("/carts", controllers.GetAllCarts)
-	admin.Post("/user/cart", controllers.GetUserCart)
-	admin.Post("/user/cart/modify", controllers.ModifyUserCart)
-	admin.Post("/user/cart/clear", controllers.ClearUserCart)
+	admin.Get("/cart/:userid", controllers.GetUserCart)
+	admin.Post("/cart/modify/:userid", controllers.ModifyUserCart)
+	admin.Get("/cart/clear/:userid", controllers.ClearUserCart)
 
 	//orders
 	admin.Get("/orders", controllers.GetAllOrders)
@@ -48,7 +48,7 @@ func AdminRoutes(app *fiber.App) {
 	admin.Get("/reviews", controllers.GetAllReviews)
 	admin.Post("/book/reviews", controllers.GetReviews)
 	admin.Get("/book/review/:id", controllers.GetReview)
-	admin.Post("/book/review/Modify", controllers.UpdateReview)
+	admin.Post("/book/review/modify", controllers.UpdateReview)
 	admin.Post("/book/review/delete", controllers.DeleteReview)
 
 	//vendors

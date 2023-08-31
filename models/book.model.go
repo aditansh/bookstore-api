@@ -25,7 +25,7 @@ type Book struct {
 }
 
 type Review struct {
-	ID        string    `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"-"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"-"`
 	UserID    uuid.UUID `gorm:"type:uuid;not null" json:"-"`
 	BookID    uuid.UUID `gorm:"type:uuid;not null" json:"-"`
 	Comment   string    `gorm:"not null" json:"comment"`

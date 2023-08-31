@@ -75,6 +75,31 @@ func GetFlaggedUsers() ([]models.User, error) {
 	return users, nil
 }
 
+func GetUserCart(ID uuid.UUID) (models.Cart, error) {
+	user, err := GetUserByID(ID)
+	if err != nil {
+		return models.Cart{}, err
+	}
+
+	var cart models.Cart
+	result := database.DB.Where("user_id = ?", ID).First(&cart)
+	if result.Error != nil && result.Error.Error() == "record not found" {
+		newCart := models.Cart{
+			UserID:   ID,
+			Username: user.Username,
+		}
+		result := database.DB.Create(&newCart)
+		if result.Error != nil {
+			return models.Cart{}, result.Error
+		}
+		return newCart, nil
+	} else if result.Error != nil {
+		return models.Cart{}, result.Error
+	}
+
+	return cart, nil
+}
+
 func RegisterUser(payload *schemas.RegisterUserSchema, isAdmin bool) *fiber.Error {
 
 	_, check1 := GetUserByEmail(payload.Email)
