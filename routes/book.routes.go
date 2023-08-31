@@ -13,9 +13,12 @@ func BookRoutes(app *fiber.App) {
 	book.Get("/getall", controllers.GetBooks)
 	book.Post("/search", controllers.SearchBooks)
 	book.Post("/filter", controllers.FilterBooks)
+}
 
-	bookAdmin := app.Group("/book", middleware.VerifyVendorToken)
+func BookAdminRoutes(app *fiber.App) {
+
+	bookAdmin := app.Group("/bookadmin", middleware.VerifyVendorToken)
 	bookAdmin.Post("/create", controllers.CreateBook)
-	bookAdmin.Post("/update", controllers.UpdateBook)
+	bookAdmin.Post("/update/:id", controllers.UpdateBook)
 	bookAdmin.Post("/delete", controllers.DeleteBooks)
 }

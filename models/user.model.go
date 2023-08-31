@@ -16,9 +16,9 @@ type User struct {
 	IsActive   bool      `gorm:"default:true" json:"isActive"`
 	IsDeleted  bool      `gorm:"default:false" json:"isDeleted"`
 	Role       string    `gorm:"default:'user'" json:"role"`
-	Reviews    []Review  `gorm:"foreignKey:UserID" json:"reviews"`
-	Cart       Cart      `gorm:"foreignKey:UserID" json:"cart"`
-	Orders     []Order   `gorm:"foreignKey:UserID" json:"orders"`
+	Reviews    []Review  `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"reviews"`
+	Cart       Cart      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"cart"`
+	Orders     []Order   `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"orders"`
 	IsFlagged  bool      `gorm:"default:false" json:"isFlagged"`
 	CreatedAt  time.Time `gorm:"autoCreateTime" json:"-"`
 	UpdatedAt  time.Time `gorm:"autoUpdateTime" json:"-"`

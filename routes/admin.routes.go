@@ -41,8 +41,7 @@ func AdminRoutes(app *fiber.App) {
 	//books
 	admin.Get("/books", controllers.GetBooks)
 	admin.Get("/book/:id", controllers.GetBook)
-	admin.Post("/book/create", controllers.CreateBook)
-	admin.Post("/book/update", controllers.UpdateBook)
+	admin.Post("/book/update/:id", controllers.UpdateBook)
 	admin.Post("/book/delete", controllers.DeleteBooks)
 
 	//reviews

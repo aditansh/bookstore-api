@@ -201,6 +201,10 @@ func ApproveVendor(email string) *fiber.Error {
 		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
 
+	if !vendor.IsVerified {
+		return fiber.NewError(fiber.StatusBadRequest, "Vendor not verified")
+	}
+
 	updates := make(map[string]interface{})
 	updates["is_approved"] = true
 	updates["is_flagged"] = false

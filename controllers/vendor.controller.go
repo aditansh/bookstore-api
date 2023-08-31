@@ -284,7 +284,7 @@ func UpdateVendor(c *fiber.Ctx) error {
 		})
 	}
 
-	if email != "" {
+	if email == "" {
 		temp := c.Locals("ID").(uuid.UUID)
 		ID = &temp
 	} else {
@@ -315,7 +315,7 @@ func UpdateVendor(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  true,
-		"message": "User updates successfully",
+		"message": "User updated successfully",
 	})
 }
 

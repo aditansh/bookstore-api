@@ -64,7 +64,7 @@ func GetFlaggedVendors() ([]models.Vendor, error) {
 func RegisterVendor(payload *schemas.RegisterVendorSchema) *fiber.Error {
 
 	_, check1 := GetVendorByEmail(payload.Email)
-	if check1 != nil {
+	if check1 == nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Email already exists")
 	}
 
@@ -142,6 +142,11 @@ func LoginVendor(payload *schemas.LoginEmailSchema) (string, *fiber.Error) {
 	token, err := utils.GenerateRefreshToken(vendor.ID, vendor.Email)
 	if err != nil {
 		return "", fiber.NewError(fiber.StatusInternalServerError, "Error generating token")
+	}
+
+	err = cache.SetValue(token, vendor.ID.String(), 0)
+	if err != nil {
+		return "", fiber.NewError(fiber.StatusInternalServerError, "Error storing token")
 	}
 
 	return token, nil

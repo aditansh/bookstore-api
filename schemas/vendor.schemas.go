@@ -7,6 +7,6 @@ type RegisterVendorSchema struct {
 }
 
 type UpdateVendorSchema struct {
-	Name  string `json:"name" validate:"required,min=3"`
-	Email string `json:"email" validate:"required,email"`
+	Name  string `json:"name,omitempty" validate:"omitempty,min=3"`
+	Email string `json:"email,omitempty" validate:"omitempty,email"`
 }

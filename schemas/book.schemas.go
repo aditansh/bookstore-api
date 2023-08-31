@@ -1,21 +1,15 @@
 package schemas
 
 type SearchBooksSchema struct {
-	SearchBy string `json:"searchBy" validate:"required; oneof=name author"`
+	SearchBy string `json:"searchBy" validate:"required,oneof=name author"`
 	Search   string `json:"search" validate:"required"`
 }
 
 type FilterBooksSchema struct {
-	Filters BookFiltersSchema `json:"filters" validate:"required"`
-}
-
-type BookFiltersSchema struct {
-	Authors     []string  `json:"authors"`
-	Categories  []string  `json:"categories"`
-	PriceRange  []float64 `json:"priceRange"`
+	Categories  []string  `json:"categories" validate:"omitempty,dive,max=255"`
+	PriceRange  []float64 `json:"priceRange" validate:"omitempty,dive,min=0"`
 	InStock     bool      `json:"inStock"`
-	RatingRange []int     `json:"ratingRange"`
-	Vendors     []string  `json:"vendors"`
+	RatingRange []float64 `json:"ratingRange" validate:"omitempty,dive,min=0,max=5"`
 }
 
 type CreateBookSchema struct {
@@ -28,13 +22,12 @@ type CreateBookSchema struct {
 }
 
 type UpdateBookSchema struct {
-	ID          string   `json:"id" validate:"required"`
-	Name        string   `json:"name" validate:"required"`
-	Author      string   `json:"author" validate:"required"`
-	Description string   `json:"description" validate:"required"`
-	Categories  []string `json:"categories" validate:"required"`
-	Price       float64  `json:"price" validate:"required"`
-	Stock       int      `json:"stock" validate:"required"`
+	Name        string   `json:"name,omitempty" validate:"omitempty,required"`
+	Author      string   `json:"author,omitempty" validate:"omitempty,required"`
+	Description string   `json:"description,omitempty" validate:"omitempty,required"`
+	Categories  []string `json:"categories,omitempty" validate:"omitempty,required"`
+	Price       float64  `json:"price,omitempty" validate:"omitempty,required"`
+	Stock       int      `json:"stock,omitempty" validate:"omitempty,required"`
 }
 
 type DeleteBooksSchema struct {
