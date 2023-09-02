@@ -19,6 +19,7 @@ type Order struct {
 type OrderItem struct {
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"-"`
 	OrderID    uuid.UUID `gorm:"type:uuid;not null" json:"-"`
+	BookID     uuid.UUID `gorm:"type:uuid;not null" json:"book_id"`
 	BookName   string    `gorm:"not null" json:"book_name"`
 	Author     string    `gorm:"not null" json:"author"`
 	VendorName string    `gorm:"not null" json:"vendor_name"`

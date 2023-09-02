@@ -19,9 +19,25 @@ func GetCart(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status": true,
 		"data":   cart,
+	})
+}
+
+func GetCartValue(c *fiber.Ctx) error {
+	ID := c.Locals("ID").(uuid.UUID)
+
+	value, err := services.GetCartValue(ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Error(),
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status": true,
+		"data":   value,
 	})
 }
 
@@ -156,8 +172,16 @@ func Checkout(c *fiber.Ctx) error {
 	}
 
 	ID := c.Locals("ID").(uuid.UUID)
-	err := services.Checkout(ID, &payload)
+	orderID, err := services.Checkout(ID, &payload)
 	if err != nil {
+		result := services.ClearOrderItems(orderID)
+		if result != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"status":  false,
+				"message": err.Error(),
+			})
+		}
+
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),

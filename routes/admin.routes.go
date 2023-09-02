@@ -32,11 +32,11 @@ func AdminRoutes(app *fiber.App) {
 	//orders
 	admin.Get("/orders", controllers.GetAllOrders)
 	admin.Post("orders/search", controllers.SearchOrders)
-	admin.Post("orders/filter", controllers.FilterOrders)
-	admin.Post("/user/orders", controllers.GetUserOrders)
-	admin.Post("/user/order", controllers.GetUserOrder)
-	admin.Post("/user/orders/search", controllers.SearchOrders)
-	admin.Post("/user/orders/filter", controllers.FilterOrders)
+	// admin.Post("orders/filter", controllers.FilterOrders)
+	admin.Post("/orders/user/:id", controllers.GetUserOrders)
+	admin.Get("/orders/user/:userid/:orderid", controllers.GetUserOrder)
+	admin.Post("/orders/user/:id/search", controllers.SearchOrders)
+	// admin.Post("/orders/filter/:id/filter", controllers.FilterOrders)
 
 	//books
 	admin.Get("/books", controllers.GetBooks)
@@ -46,10 +46,9 @@ func AdminRoutes(app *fiber.App) {
 
 	//reviews
 	admin.Get("/reviews", controllers.GetAllReviews)
-	admin.Post("/book/reviews", controllers.GetReviews)
 	admin.Get("/book/review/:id", controllers.GetReview)
 	admin.Post("/book/review/modify", controllers.UpdateReview)
-	admin.Post("/book/review/delete", controllers.DeleteReview)
+	admin.Post("/book/review/delete", controllers.DeleteReviews)
 
 	//vendors
 	admin.Get("/vendors", controllers.GetAllVendors)

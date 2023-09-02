@@ -82,7 +82,7 @@ func GetUserCart(ID uuid.UUID) (models.Cart, error) {
 	}
 
 	var cart models.Cart
-	result := database.DB.Where("user_id = ?", ID).First(&cart)
+	result := database.DB.Preload("Items").Where("user_id = ?", ID).First(&cart)
 	if result.Error != nil && result.Error.Error() == "record not found" {
 		newCart := models.Cart{
 			UserID:   ID,

@@ -11,7 +11,6 @@ type Cart struct {
 	UserID   uuid.UUID  `gorm:"type:uuid;not null" json:"-"`
 	Username string     `gorm:"not null" json:"username"`
 	Items    []CartItem `gorm:"foreignKey:CartID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"items"`
-	Value    float64    `gorm:"not null; default:0" json:"value"`
 }
 
 type CartItem struct {

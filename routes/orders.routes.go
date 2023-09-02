@@ -11,6 +11,6 @@ func OrderRoutes(app *fiber.App) {
 	orders := app.Group("/orders", middleware.VerifyUserToken)
 	orders.Get("/get", controllers.GetOrders)
 	orders.Get("/get/:id", controllers.GetOrder)
-	orders.Post("/search", controllers.SearchOrders)
-	orders.Post("/filter", controllers.FilterOrders)
+	orders.Post("/search", controllers.SearchUserOrders)
+	// orders.Post("/filter", controllers.FilterUserOrders)
 }

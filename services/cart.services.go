@@ -8,6 +8,7 @@ import (
 	"github.com/aditansh/balkan-task/database"
 	"github.com/aditansh/balkan-task/models"
 	"github.com/aditansh/balkan-task/schemas"
+	"github.com/aditansh/balkan-task/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -16,7 +17,7 @@ func GetAllCarts() ([]models.Cart, error) {
 	var carts []models.Cart
 	result := database.DB.Preload("Items").Find(&carts)
 	if result.Error != nil {
-		return nil, result.Error
+		return []models.Cart{}, result.Error
 	}
 
 	return carts, nil
@@ -59,7 +60,9 @@ func AddToCart(ID uuid.UUID, payload *schemas.ModifyCartSchema) *fiber.Error {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
-	fmt.Println(book.Name)
+	if payload.Quantity > book.Stock {
+		return fiber.NewError(fiber.StatusBadRequest, "not enough stock available")
+	}
 
 	newCartItem := models.CartItem{
 		CartID:   cart.ID,
@@ -88,6 +91,15 @@ func UpdateCart(ID uuid.UUID, payload *schemas.ModifyCartSchema) *fiber.Error {
 	bookID, err := uuid.Parse(payload.BookID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid book id")
+	}
+
+	book, err := GetBookByID(bookID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	if payload.Quantity > book.Stock {
+		return fiber.NewError(fiber.StatusBadRequest, "not enough stock available")
 	}
 
 	cartItem, err := GetCartItem(cart.ID, bookID)
@@ -133,7 +145,6 @@ func RemoveFromCart(ID uuid.UUID, payload *schemas.RemoveFromCart) *fiber.Error 
 		return fiber.NewError(fiber.StatusBadRequest, "invalid book id")
 	}
 
-	fmt.Println(cart.ID, bookID)
 	var cartItem models.CartItem
 	result := database.DB.Where("cart_id = ? AND book_id = ?", cart.ID, bookID).Delete(&cartItem)
 	if result.Error != nil {
@@ -143,59 +154,117 @@ func RemoveFromCart(ID uuid.UUID, payload *schemas.RemoveFromCart) *fiber.Error 
 	return nil
 }
 
-func Checkout(ID uuid.UUID, payload *schemas.CheckoutSchema) *fiber.Error {
+func Checkout(ID uuid.UUID, payload *schemas.CheckoutSchema) (string, *fiber.Error) {
+	user, err := GetUserByID(ID)
+	if err != nil {
+		return "", fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+	userBooks := user.Books
+
 	cart, err := GetUserCart(ID)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return "", fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	if len(cart.Items) == 0 {
+		return "", fiber.NewError(fiber.StatusBadRequest, "cart is empty")
 	}
 
 	order, err := CreateOrder(ID, payload.Address)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return "", fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
-
-	var orderItems []models.OrderItem
-	var totalCost = 0.0
 
 	for _, cartItem := range cart.Items {
 		book, err := GetBookByID(cartItem.BookID)
 		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			return order.ID.String(), fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		if cartItem.Quantity > book.Stock {
+			return order.ID.String(), fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("not enough stock for %s", book.Name))
 		}
 
 		vendor, err := GetVendorByID(book.VendorID)
 		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			return order.ID.String(), fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		orderItem := models.OrderItem{
 			OrderID:    order.ID,
+			BookID:     book.ID,
 			BookName:   book.Name,
 			Author:     book.Author,
 			Quantity:   cartItem.Quantity,
 			VendorName: vendor.Name,
 		}
 
-		totalCost += float64(cartItem.Quantity) * book.Cost
+		result := database.DB.Create(&orderItem)
+		if result.Error != nil {
+			return order.ID.String(), fiber.NewError(fiber.StatusInternalServerError, result.Error.Error())
+		}
 
-		orderItems = append(orderItems, orderItem)
+		updates := make(map[string]interface{})
+		updates["stock"] = book.Stock - cartItem.Quantity
+		updates["updated_at"] = time.Now()
+
+		result = database.DB.Model(&book).Updates(updates)
+		if result.Error != nil {
+			return order.ID.String(), fiber.NewError(fiber.StatusInternalServerError, result.Error.Error())
+		}
+
+		userBooks = utils.AppendUnique(userBooks, book.ID.String())
+	}
+
+	cartValue, err := GetCartValue(ID)
+	if err != nil {
+		return order.ID.String(), fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	updates := make(map[string]interface{})
-	updates["value"] = totalCost
-	updates["items"] = orderItems
+	updates["value"] = cartValue
 	updates["updated_at"] = time.Now()
 
 	result := database.DB.Model(&order).Updates(updates)
 	if result.Error != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, result.Error.Error())
+		return order.ID.String(), fiber.NewError(fiber.StatusInternalServerError, result.Error.Error())
 	}
 
-	var cartItem models.CartItem
-	result = database.DB.Where("cart_id = ?", cart.ID).Delete(&cartItem)
+	updates = make(map[string]interface{})
+	updates["books"] = userBooks
+
+	result = database.DB.Model(&user).Updates(updates)
 	if result.Error != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, result.Error.Error())
+		return order.ID.String(), fiber.NewError(fiber.StatusInternalServerError, result.Error.Error())
 	}
 
-	return nil
+	errr := ClearCart(ID)
+	if errr != nil {
+		return "", errr
+	}
+
+	return "", nil
+}
+
+func GetCartValue(ID uuid.UUID) (float64, error) {
+	cart, err := GetUserCart(ID)
+	if err != nil {
+		return 0, err
+	}
+
+	if len(cart.Items) == 0 {
+		return 0, fmt.Errorf("no items in cart")
+	}
+
+	var value float64
+	for _, cartItem := range cart.Items {
+		book, err := GetBookByID(cartItem.BookID)
+		if err != nil {
+			return 0, err
+		}
+
+		value += book.Cost * float64(cartItem.Quantity)
+	}
+
+	return value, nil
 }

@@ -1,7 +1,7 @@
 package schemas
 
 type SearchOrdersSchema struct {
-	SearchBy string `json:"search_by" validate:"required; oneof=username email book_name author vendor_name"`
+	SearchBy string `json:"searchBy" validate:"required; oneof=bookName author vendorName"`
 	Query    string `json:"query" validate:"required"`
 }
 

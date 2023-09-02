@@ -15,4 +15,5 @@ func CartRoutes(app *fiber.App) {
 	cart.Get("/clear", controllers.ClearCart)
 	cart.Get("/get", controllers.GetCart)
 	cart.Post("/checkout", controllers.Checkout)
+	cart.Get("/value", controllers.GetCartValue)
 }

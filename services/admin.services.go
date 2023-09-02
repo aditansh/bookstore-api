@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/aditansh/balkan-task/database"
@@ -13,7 +12,6 @@ import (
 
 func MakeAdmins(usernames []string) *fiber.Error {
 	for _, username := range usernames {
-		fmt.Println(username)
 		user, err := GetUserByUsername(username)
 		if err != nil {
 			return fiber.NewError(fiber.StatusNotFound, err.Error())

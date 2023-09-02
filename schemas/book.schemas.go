@@ -17,7 +17,7 @@ type CreateBookSchema struct {
 	Author      string   `json:"author" validate:"required"`
 	Description string   `json:"description" validate:"required"`
 	Categories  []string `json:"categories" validate:"required"`
-	Price       float64  `json:"price" validate:"required"`
+	Cost        float64  `json:"cost" validate:"required"`
 	Stock       int      `json:"stock" validate:"required"`
 }
 
@@ -26,7 +26,7 @@ type UpdateBookSchema struct {
 	Author      string   `json:"author,omitempty" validate:"omitempty,required"`
 	Description string   `json:"description,omitempty" validate:"omitempty,required"`
 	Categories  []string `json:"categories,omitempty" validate:"omitempty,required"`
-	Price       float64  `json:"price,omitempty" validate:"omitempty,required"`
+	Cost        float64  `json:"cost,omitempty" validate:"omitempty,required"`
 	Stock       int      `json:"stock,omitempty" validate:"omitempty,required"`
 }
 

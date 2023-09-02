@@ -13,7 +13,7 @@ import (
 
 func GetBookByID(ID uuid.UUID) (models.Book, error) {
 	var book models.Book
-	result := database.DB.Where("id = ?", ID).First(&book)
+	result := database.DB.Preload("InCart").Preload("Reviews").Where("id = ?", ID).First(&book)
 	if result.Error != nil {
 		return models.Book{}, result.Error
 	}
@@ -23,7 +23,7 @@ func GetBookByID(ID uuid.UUID) (models.Book, error) {
 
 func GetBooks() ([]models.Book, error) {
 	var books []models.Book
-	result := database.DB.Find(&books)
+	result := database.DB.Preload("InCart").Preload("Reviews").Find(&books)
 	if result.Error != nil {
 		return []models.Book{}, result.Error
 	}
@@ -33,7 +33,7 @@ func GetBooks() ([]models.Book, error) {
 
 func GetBooksByVendorID(ID uuid.UUID) ([]models.Book, error) {
 	var books []models.Book
-	result := database.DB.Where("vendor_id = ?", ID).Find(&books)
+	result := database.DB.Preload("InCart").Preload("Reviews").Where("vendor_id = ?", ID).Find(&books)
 	if result.Error != nil {
 		return []models.Book{}, result.Error
 	}
@@ -43,7 +43,7 @@ func GetBooksByVendorID(ID uuid.UUID) ([]models.Book, error) {
 
 func FindBookByIDAndVendorID(bookID uuid.UUID, vendorID uuid.UUID) (models.Book, error) {
 	var book models.Book
-	result := database.DB.Where("id = ? AND vendor_id = ?", bookID, vendorID).First(&book)
+	result := database.DB.Preload("InCart").Preload("Reviews").Where("id = ? AND vendor_id = ?", bookID, vendorID).First(&book)
 	if result.Error != nil {
 		return models.Book{}, result.Error
 	}
@@ -68,7 +68,7 @@ func CreateBook(payload *schemas.CreateBookSchema, ID uuid.UUID) *fiber.Error {
 		Author:      payload.Author,
 		Description: payload.Description,
 		Categories:  payload.Categories,
-		Price:       payload.Price,
+		Cost:        payload.Cost,
 		Stock:       payload.Stock,
 		VendorID:    ID,
 	}
@@ -110,8 +110,8 @@ func UpdateBook(payload *schemas.UpdateBookSchema, bookID uuid.UUID) *fiber.Erro
 	if payload.Categories != nil {
 		updates["categories"] = payload.Categories
 	}
-	if payload.Price != 0 {
-		updates["price"] = payload.Price
+	if payload.Cost != 0 {
+		updates["cost"] = payload.Cost
 	}
 	if payload.Stock != 0 {
 		updates["stock"] = payload.Stock
@@ -256,7 +256,7 @@ func FilterBooksByCategory(categories []string, allBooks []models.Book) ([]model
 func FilterBooksByPriceRange(min float64, max float64, allBooks []models.Book) ([]models.Book, error) {
 	var books []models.Book
 	for _, book := range allBooks {
-		if book.Price >= min && book.Price <= max {
+		if book.Cost >= min && book.Cost <= max {
 			books = append(books, book)
 		}
 	}
