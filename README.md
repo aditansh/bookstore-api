@@ -44,9 +44,3 @@ docker-compose up --build -d
 **Server:** Golang, PostgreSQL, Redis
 
 **Deployemnt:** Docker, Droplet
-
-
-## Documentation
-
-[Documentation](https://linktodocumentation)
-
