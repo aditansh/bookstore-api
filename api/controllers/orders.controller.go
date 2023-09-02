@@ -138,15 +138,17 @@ func GetAllOrders(c *fiber.Ctx) error {
 }
 
 func GetUserOrders(c *fiber.Ctx) error {
-	userID, err := uuid.Parse(c.Params("id"))
+	username := (c.Params("username"))
+
+	user, err := services.GetUserByUsername(username)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	orders, err := services.GetOrders(userID)
+	orders, err := services.GetOrders(user.ID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
@@ -161,9 +163,11 @@ func GetUserOrders(c *fiber.Ctx) error {
 }
 
 func GetUserOrder(c *fiber.Ctx) error {
-	userID, err := uuid.Parse(c.Params("userid"))
+	username := (c.Params("username"))
+
+	user, err := services.GetUserByUsername(username)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
@@ -177,7 +181,7 @@ func GetUserOrder(c *fiber.Ctx) error {
 		})
 	}
 
-	order, err := services.GetOrderByUserIDAndOrderID(userID, orderID)
+	order, err := services.GetOrderByUserIDAndOrderID(user.ID, orderID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
@@ -209,9 +213,9 @@ func SearchOrders(c *fiber.Ctx) error {
 		})
 	}
 
-	userIDStr := c.Params("id")
+	username := c.Params("username")
 
-	if userIDStr == "" {
+	if username == ":username" {
 		if payload.SearchBy == "bookName" {
 			orders, err := services.SearchAllOrdersByBookName(payload.Query)
 			if err != nil {
@@ -258,16 +262,16 @@ func SearchOrders(c *fiber.Ctx) error {
 			})
 		}
 	} else {
-		userID, err := uuid.Parse(userIDStr)
+		user, err := services.GetUserByUsername(username)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 				"status":  false,
 				"message": err.Error(),
 			})
 		}
 
 		if payload.SearchBy == "bookName" {
-			orders, err := services.SearchOrdersByBookName(payload.Query, userID)
+			orders, err := services.SearchOrdersByBookName(payload.Query, user.ID)
 			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"status":  false,
@@ -280,7 +284,7 @@ func SearchOrders(c *fiber.Ctx) error {
 				"data":   orders,
 			})
 		} else if payload.SearchBy == "author" {
-			orders, err := services.SearchOrdersByAuthor(payload.Query, userID)
+			orders, err := services.SearchOrdersByAuthor(payload.Query, user.ID)
 			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"status":  false,
@@ -293,7 +297,7 @@ func SearchOrders(c *fiber.Ctx) error {
 				"data":   orders,
 			})
 		} else if payload.SearchBy == "vendorName" {
-			orders, err := services.SearchOrdersByVendorName(payload.Query, userID)
+			orders, err := services.SearchOrdersByVendorName(payload.Query, user.ID)
 			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"status":  false,

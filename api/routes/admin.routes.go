@@ -33,9 +33,9 @@ func AdminRoutes(app *fiber.App) {
 	admin.Get("/orders", controllers.GetAllOrders)
 	admin.Post("orders/search", controllers.SearchOrders)
 	// admin.Post("orders/filter", controllers.FilterOrders)
-	admin.Post("/orders/user/:id", controllers.GetUserOrders)
-	admin.Get("/orders/user/:userid/:orderid", controllers.GetUserOrder)
-	admin.Post("/orders/user/:id/search", controllers.SearchOrders)
+	admin.Get("/orders/user/:username", controllers.GetUserOrders)
+	admin.Get("/orders/user/:username/:orderid", controllers.GetUserOrder)
+	admin.Post("/orders/user/:username/search", controllers.SearchOrders)
 	// admin.Post("/orders/filter/:id/filter", controllers.FilterOrders)
 
 	//books

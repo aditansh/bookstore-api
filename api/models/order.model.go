@@ -7,7 +7,7 @@ import (
 )
 
 type Order struct {
-	ID        uuid.UUID   `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"-"`
+	ID        uuid.UUID   `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"id"`
 	UserID    uuid.UUID   `gorm:"type:uuid;not null" json:"-"`
 	Items     []OrderItem `gorm:"foreignKey:OrderID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"items"`
 	Address   string      `gorm:"not null" json:"address"`
