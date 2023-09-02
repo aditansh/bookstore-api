@@ -6,10 +6,9 @@ type SearchBooksSchema struct {
 }
 
 type FilterBooksSchema struct {
-	Categories  []string  `json:"categories" validate:"omitempty,dive,max=255"`
-	PriceRange  []float64 `json:"priceRange" validate:"omitempty,dive,min=0"`
-	InStock     bool      `json:"inStock"`
-	RatingRange []float64 `json:"ratingRange" validate:"omitempty,dive,min=0,max=5"`
+	Categories []string  `json:"categories" validate:"omitempty,dive,max=255"`
+	PriceRange []float64 `json:"priceRange" validate:"omitempty,dive,min=0"`
+	InStock    bool      `json:"inStock"`
 }
 
 type CreateBookSchema struct {

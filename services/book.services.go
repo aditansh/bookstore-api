@@ -224,13 +224,6 @@ func FilterBooks(payload *schemas.FilterBooksSchema) ([]models.Book, *fiber.Erro
 		}
 	}
 
-	if payload.RatingRange != nil {
-		books, err = FilterBooksByRatingRange(payload.RatingRange[0], payload.RatingRange[1], books)
-		if err != nil {
-			return []models.Book{}, fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
-	}
-
 	return books, nil
 }
 
@@ -272,21 +265,6 @@ func FilterBooksByStock(allBooks []models.Book) ([]models.Book, error) {
 	var books []models.Book
 	for _, book := range allBooks {
 		if book.Stock > 0 {
-			books = append(books, book)
-		}
-	}
-
-	if len(books) == 0 {
-		return []models.Book{}, fiber.NewError(fiber.StatusNotFound, "no books found")
-	}
-
-	return books, nil
-}
-
-func FilterBooksByRatingRange(min float64, max float64, allBooks []models.Book) ([]models.Book, error) {
-	var books []models.Book
-	for _, book := range allBooks {
-		if book.Rating >= min && book.Rating <= max {
 			books = append(books, book)
 		}
 	}

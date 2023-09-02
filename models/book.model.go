@@ -14,7 +14,6 @@ type Book struct {
 	Description string         `gorm:"not null" json:"description"`
 	Categories  pq.StringArray `gorm:"type:varchar(64)[];not null" json:"categories"`
 	Stock       int            `gorm:"not null" json:"stock"`
-	Rating      float64        `gorm:"not null;default:0;check:rating BETWEEN 0 AND 5" json:"rating"`
 	Reviews     []Review       `gorm:"foreignKey:BookID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"reviews"`
 	InCart      []CartItem     `gorm:"foreignKey:BookID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"inCart"`
 	VendorID    uuid.UUID      `gorm:"type:uuid;not null" json:"-"`
