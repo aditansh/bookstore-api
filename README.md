@@ -3,11 +3,6 @@
 
 API for online book store with users, admins and vendors.
 
-## Demo
-
-Use this api endpoint http://174.138.121.246/api
-
-
 ## Environment Variables
 
 To run this project, check the sample.env file and add the variables.
