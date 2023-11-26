@@ -18,13 +18,13 @@ Check the [Postman Collection](https://documenter.getpostman.com/view/25706513/2
 Clone the project
 
 ```bash
-  git clone https://github.com/BalkanID-University/vit-2025-summer-engineering-internship-task-aditansh.git
+  git clone https://github.com/aditansh/bookstore-api.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd vit-2025-summer-engineering-internship-task-aditansh.git
+  cd bookstore-api
 ```
 
 Run Docker Compose
